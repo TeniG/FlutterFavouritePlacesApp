@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: theme,
-      home: const Text("Favourite Place app"),
+      home: const PlacesScreen(),
     );
   }
 }
