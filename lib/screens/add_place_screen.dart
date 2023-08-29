@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_favourite_places/models/places.dart';
+import 'package:flutter_favourite_places/models/place.dart';
 import 'package:flutter_favourite_places/providers/place_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,18 +15,20 @@ class AddPlace extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    void _savePlace() {
+    void addPlace() {
       if (_formKey.currentState!.validate()) {
         _formKey.currentState!.save();
 
-        ref.watch(placeProvider.notifier).addPlace(Places(_enteredName));
-         Navigator.of(context).pop();
+        ref.read(placeProvider.notifier).addPlace(
+              Place(name: _enteredName),
+            );
+        Navigator.of(context).pop();
       }
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Place"),
+        title: const Text("Add new Place"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -34,8 +36,13 @@ class AddPlace extends ConsumerWidget {
           key: _formKey,
           child: Column(children: [
             TextFormField(
-              style: const TextStyle(fontSize: 18),
-              decoration: const InputDecoration(label: Text("Name")),
+              style: TextStyle(
+                fontSize: 18,
+                color: Theme.of(context).colorScheme.onBackground,
+              ),
+              decoration: const InputDecoration(
+                label: Text("Name", style: TextStyle(fontSize: 18)),
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty || value.length < 2) {
                   return "Name should be between 2 to 50 character";
@@ -56,8 +63,8 @@ class AddPlace extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 TextButton(
-                  onPressed: _savePlace,
-                  child: const Text("Save Place"),
+                  onPressed: addPlace,
+                  child: const Text("Add Place"),
                 ),
               ],
             ),

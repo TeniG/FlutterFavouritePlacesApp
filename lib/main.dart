@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_favourite_places/widgets/places_screen.dart';
+import 'package:flutter_favourite_places/screens/place_list_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: theme,
-      home: const PlacesScreen(),
+      home: const PlaceListScreen(),
     );
   }
 }
