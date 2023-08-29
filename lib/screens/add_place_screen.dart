@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_favourite_places/models/place.dart';
 import 'package:flutter_favourite_places/providers/place_provider.dart';
+import 'package:flutter_favourite_places/widgets/input_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AddPlace extends ConsumerWidget {
@@ -54,6 +55,8 @@ class AddPlace extends ConsumerWidget {
               },
             ),
             const SizedBox(height: 12),
+            const InputImage(),
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -62,9 +65,10 @@ class AddPlace extends ConsumerWidget {
                   child: const Text("Reset"),
                 ),
                 const SizedBox(height: 16),
-                TextButton(
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.add),
                   onPressed: addPlace,
-                  child: const Text("Add Place"),
+                  label: const Text("Add Place"),
                 ),
               ],
             ),
