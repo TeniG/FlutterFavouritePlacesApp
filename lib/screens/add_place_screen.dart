@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_favourite_places/models/place.dart';
 import 'package:flutter_favourite_places/providers/place_provider.dart';
-import 'package:flutter_favourite_places/widgets/input_image.dart';
+import 'package:flutter_favourite_places/widgets/image_input.dart';
 
 class AddPlace extends ConsumerWidget {
   AddPlace({super.key});
@@ -65,7 +65,7 @@ class AddPlace extends ConsumerWidget {
                 },
               ),
               const SizedBox(height: 12),
-              InputImage(onPickedImage: getSelectedImage),
+              ImageInput(onPickedImage: getSelectedImage),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
