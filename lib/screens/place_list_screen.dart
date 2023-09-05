@@ -37,10 +37,10 @@ class _PlaceListScreenState extends ConsumerState<PlaceListScreen> {
   Widget build(BuildContext context) {
     final placeList = ref.watch(placeProvider);
 
-    Widget content =  Center(
+    Widget content = Center(
       child: Text(
         "No Places added yet",
-        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+        style: Theme.of(context).textTheme.titleLarge!.copyWith(
               color: Theme.of(context).colorScheme.onBackground,
             ),
       ),
@@ -50,6 +50,11 @@ class _PlaceListScreenState extends ConsumerState<PlaceListScreen> {
       content = ListView.builder(
         itemBuilder: (ctx, position) {
           return ListTile(
+            contentPadding: const EdgeInsets.all(8),
+            leading: CircleAvatar(
+              radius: 26,
+              backgroundImage: FileImage(placeList[position].image),
+            ),
             title: Text(
               placeList[position].name,
               style: Theme.of(context).textTheme.titleMedium!.copyWith(
