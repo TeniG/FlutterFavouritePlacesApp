@@ -63,7 +63,7 @@ class _ImageInputState extends State<ImageInput> {
         ),
       ),
       width: double.infinity,
-      height: 250,
+      height: 200,
       child: content,
     );
   }

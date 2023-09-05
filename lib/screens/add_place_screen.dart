@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_favourite_places/widgets/location_input.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_favourite_places/models/place.dart';
@@ -66,6 +67,8 @@ class AddPlace extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               ImageInput(onPickedImage: getSelectedImage),
+               const SizedBox(height: 12),
+              const LocationInput(),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
