@@ -3,6 +3,7 @@ import 'package:flutter_favourite_places/models/place.dart';
 import 'package:flutter_favourite_places/providers/place_provider.dart';
 import 'package:flutter_favourite_places/screens/add_place_screen.dart';
 import 'package:flutter_favourite_places/screens/place_details_screen.dart';
+import 'package:flutter_favourite_places/widgets/location_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class PlaceListScreen extends ConsumerStatefulWidget {

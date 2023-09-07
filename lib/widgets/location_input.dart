@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 
@@ -12,33 +13,41 @@ class LocationInput extends StatefulWidget {
 
 class _LocationInputState extends State<LocationInput> {
   bool isGettingLocation = false;
-  void _getCurrentLocation() async {
-    Location location = Location();
 
+  Future<bool> _handleLocationPermission() async {
+    Location location = Location();
     bool serviceEnabled;
-    PermissionStatus permissionGranted;
-    LocationData locationData;
+    PermissionStatus permissionStatus;
 
     serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
       if (!serviceEnabled) {
-        return;
+        return false;
       }
     }
 
-    permissionGranted = await location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) {
-        return;
+    permissionStatus = await location.hasPermission();
+    if (permissionStatus == PermissionStatus.denied) {
+      permissionStatus = await location.requestPermission();
+      if (permissionStatus != PermissionStatus.granted) {
+        return false;
       }
     }
+    return true;
+  }
+
+  void _getCurrentLocation() async {
+    final hasLocationPermission = await _handleLocationPermission();
+    if (!hasLocationPermission) {
+      return;
+    }
+  
     setState(() {
       isGettingLocation = true;
     });
 
-    locationData = await location.getLocation();
+    LocationData locationData = await  Location().getLocation();
 
     setState(() {
       isGettingLocation = false;
@@ -46,9 +55,10 @@ class _LocationInputState extends State<LocationInput> {
 
     var latitude = locationData.latitude;
     var longitude = locationData.longitude;
-
     print("latitude: $latitude, longitude: $longitude");
+    
   }
+
 
   @override
   Widget build(BuildContext context) {
