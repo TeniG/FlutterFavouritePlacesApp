@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_favourite_places/models/place.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -12,6 +13,8 @@ class LocationPage extends StatefulWidget {
 class _LocationPageState extends State<LocationPage> {
   String? _currentAddress;
   Position? _currentPosition;
+  bool _isGettingLocation = false;
+  PlaceLocation? _placeLocation;
 
   Future<bool> _handleLocationPermission() async {
     bool serviceEnabled;
@@ -45,55 +48,91 @@ class _LocationPageState extends State<LocationPage> {
     return true;
   }
 
-  bool isGettingLocation = false;
-  Future<void> _getCurrentPosition() async {
-    final hasPermission = await _handleLocationPermission();
+  void showProgress() {
+    setState(() {
+      _isGettingLocation = true;
+    });
+  }
 
-    if (!hasPermission) return;
+  void hideProgress() {
+    setState(() {
+      _isGettingLocation = false;
+    });
+  }
 
-    setState(() => isGettingLocation = true);
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
-        .then((Position position) {
-      
-      setState(() => _currentPosition = position);
-      
-      _getAddressFromLatLng(_currentPosition!);
+  Future<Position?> _getCurrentPosition() async {
+    return await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high)
+        .then((value) {
+      return value;
+    }).catchError((onError) {
+      debugPrint(onError);
+    });
+  }
 
-      setState(() =>isGettingLocation = false);
+  Future<String?> _getAddressFromLatLng(
+      double latitude, double longitude) async {
+    debugPrint("latitude: $latitude, longitude:$longitude");
+    return await placemarkFromCoordinates(latitude, longitude)
+        .then((List<Placemark> placemarks) {
+      Placemark place = placemarks[0];
+      String address =
+          '${place.subLocality}, ${place.thoroughfare},${place.locality} - ${place.postalCode}';
+      debugPrint("_currentAddress: $address");
 
+      return address;
     }).catchError((e) {
       debugPrint(e);
     });
   }
 
-  Future<void> _getAddressFromLatLng(Position position) async {
-    await placemarkFromCoordinates(
-            _currentPosition!.latitude, _currentPosition!.longitude)
-        .then((List<Placemark> placemarks) {
-      debugPrint("place: ${placemarks[0]}");
-      Placemark place = placemarks[0];
+  void _getUserCurrentLocation() async {
+    showProgress();
 
-      setState(() {
-        _currentAddress =
-            '${place.subLocality}, ${place.thoroughfare},${place.locality} - ${place.postalCode}';
-        debugPrint("_currentAddress: $_currentAddress");
-      });
-    }).catchError((e) {
-      debugPrint(e);
+    final hasPermission = await _handleLocationPermission();
+    if (!hasPermission) {
+      hideProgress();
+      return;
+    }
+
+    _currentPosition = await _getCurrentPosition();
+    if (_currentPosition == null) {
+      hideProgress();
+      return;
+    }
+
+    String? address = await _getAddressFromLatLng(
+        _currentPosition!.latitude, _currentPosition!.longitude);
+    if (address == null) {
+      hideProgress();
+      return;
+    }
+
+    setState(() {
+      _currentAddress = address;
     });
+    
+    _placeLocation = PlaceLocation(
+        latitude: _currentPosition!.latitude,
+        longitude: _currentPosition!.longitude,
+        address: _currentAddress!);
+
+    hideProgress();
   }
 
   @override
   Widget build(BuildContext context) {
     Widget previewLocationcontent = Text(
-      (_currentAddress) != null ? _currentAddress! : "No Location Choosen yet..",
+      (_currentAddress) != null
+          ? _currentAddress!
+          : "No Location Choosen yet..",
       style: Theme.of(context)
           .textTheme
           .bodyMedium!
           .copyWith(color: Theme.of(context).colorScheme.onBackground),
     );
 
-    if (isGettingLocation) {
+    if (_isGettingLocation) {
       previewLocationcontent = const CircularProgressIndicator();
     }
 
@@ -114,7 +153,7 @@ class _LocationPageState extends State<LocationPage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             TextButton.icon(
-              onPressed: _getCurrentPosition,
+              onPressed: _getUserCurrentLocation,
               icon: const Icon(Icons.location_on),
               label: const Text("Get Current Location"),
             ),
