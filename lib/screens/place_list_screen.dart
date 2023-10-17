@@ -61,7 +61,12 @@ class _PlaceListScreenState extends ConsumerState<PlaceListScreen> {
               style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     color: Theme.of(context).colorScheme.onBackground,
                   ),
-            ),
+                ),
+            subtitle: Text(
+              placeList[position].placeLocation.address,
+              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                  color: Theme.of(context).colorScheme.onBackground)
+                  ),
             onTap: () {
               return launchPlaceDetailsScreen(placeList[position]);
             },

@@ -15,6 +15,7 @@ class AddPlace extends ConsumerWidget {
   final _formKey = GlobalKey<FormState>();
   String _enteredName = "";
   File? _pickedImage;
+  PlaceLocation? _selectedLocation;
 
   void _resetData() {
     _formKey.currentState?.reset();
@@ -24,15 +25,19 @@ class AddPlace extends ConsumerWidget {
     _pickedImage = image;
   }
 
+  void _getPickedLocation(PlaceLocation location) {
+    _selectedLocation = location;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     void addPlace() {
 
-      if (_formKey.currentState!.validate() && _pickedImage != null) {
+      if (_formKey.currentState!.validate() && _pickedImage != null && _selectedLocation != null) {
         _formKey.currentState!.save();
 
         ref.read(placeProvider.notifier).addPlace(
-              Place(name: _enteredName, image: _pickedImage!),
+              Place(name: _enteredName, image: _pickedImage!,placeLocation: _selectedLocation!),
             );
         Navigator.of(context).pop();
       }
@@ -70,7 +75,7 @@ class AddPlace extends ConsumerWidget {
               ImageInput(onPickedImage: getSelectedImage),
                const SizedBox(height: 12),
               // const LocationInput(),
-              const LocationPage(),
+               LocationPage(onSelectedLocation: _getPickedLocation),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,

@@ -4,7 +4,9 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class LocationPage extends StatefulWidget {
-  const LocationPage({Key? key}) : super(key: key);
+  const LocationPage({Key? key, required this.onSelectedLocation}) : super(key: key);
+
+  final void Function (PlaceLocation placeLocation) onSelectedLocation;
 
   @override
   State<LocationPage> createState() => _LocationPageState();
@@ -22,10 +24,10 @@ class _LocationPageState extends State<LocationPage> {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(
               'Location services are disabled. Please enable the services')));
-      return false;
+        return false;
     }
 
     permission = await Geolocator.checkPermission();
@@ -61,25 +63,21 @@ class _LocationPageState extends State<LocationPage> {
   }
 
   Future<Position?> _getCurrentPosition() async {
-    return await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high)
+    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
         .then((value) {
-      return value;
-    }).catchError((onError) {
-      debugPrint(onError);
-    });
+          return value;
+        }).catchError((onError) {
+          debugPrint(onError);
+        });
   }
 
-  Future<String?> _getAddressFromLatLng(
-      double latitude, double longitude) async {
+  Future<String?> _getAddressFromLatLng(double latitude, double longitude) async {
     debugPrint("latitude: $latitude, longitude:$longitude");
     return await placemarkFromCoordinates(latitude, longitude)
         .then((List<Placemark> placemarks) {
-      Placemark place = placemarks[0];
-      String address =
-          '${place.subLocality}, ${place.thoroughfare},${place.locality} - ${place.postalCode}';
-      debugPrint("_currentAddress: $address");
-
+            Placemark place = placemarks[0];
+            String address ='${place.subLocality}, ${place.thoroughfare},${place.locality} - ${place.postalCode}';
+            debugPrint("_currentAddress: $address");
       return address;
     }).catchError((e) {
       debugPrint(e);
@@ -102,7 +100,10 @@ class _LocationPageState extends State<LocationPage> {
     }
 
     String? address = await _getAddressFromLatLng(
-        _currentPosition!.latitude, _currentPosition!.longitude);
+      _currentPosition!.latitude, 
+      _currentPosition!.longitude);
+
+
     if (address == null) {
       hideProgress();
       return;
@@ -116,6 +117,8 @@ class _LocationPageState extends State<LocationPage> {
         latitude: _currentPosition!.latitude,
         longitude: _currentPosition!.longitude,
         address: _currentAddress!);
+
+    widget.onSelectedLocation(_placeLocation!);
 
     hideProgress();
   }
@@ -160,7 +163,7 @@ class _LocationPageState extends State<LocationPage> {
             TextButton.icon(
               onPressed: () {},
               icon: const Icon(Icons.map),
-              label: const Text("Select your location on Map"),
+              label: const Text("Select on Map"),
             )
           ],
         )
