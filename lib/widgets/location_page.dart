@@ -4,9 +4,10 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class LocationPage extends StatefulWidget {
-  const LocationPage({Key? key, required this.onSelectedLocation}) : super(key: key);
+  const LocationPage({Key? key, required this.onSelectedLocation})
+      : super(key: key);
 
-  final void Function (PlaceLocation placeLocation) onSelectedLocation;
+  final void Function(PlaceLocation placeLocation) onSelectedLocation;
 
   @override
   State<LocationPage> createState() => _LocationPageState();
@@ -24,10 +25,10 @@ class _LocationPageState extends State<LocationPage> {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
               'Location services are disabled. Please enable the services')));
-        return false;
+      return false;
     }
 
     permission = await Geolocator.checkPermission();
@@ -63,29 +64,38 @@ class _LocationPageState extends State<LocationPage> {
   }
 
   Future<Position?> _getCurrentPosition() async {
-    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+    return await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high)
         .then((value) {
-          return value;
-        }).catchError((onError) {
-          debugPrint(onError);
-        });
+      debugPrint("_getCurrentPosition value: $value");
+      return value;
+    }).catchError((onError) {
+      debugPrint("_getCurrentPosition  error ${onError}");
+      throw Exception('Failed to get Current Position');
+    });
   }
 
-  Future<String?> _getAddressFromLatLng(double latitude, double longitude) async {
+  Future<String?> _getAddressFromLatLng(
+      double latitude, double longitude) async {
     debugPrint("latitude: $latitude, longitude:$longitude");
+
     return await placemarkFromCoordinates(latitude, longitude)
         .then((List<Placemark> placemarks) {
-            Placemark place = placemarks[0];
-            String address ='${place.subLocality}, ${place.thoroughfare},${place.locality} - ${place.postalCode}';
-            debugPrint("_currentAddress: $address");
-      return address;
-    }).catchError((e) {
-      debugPrint(e);
-    });
+          Placemark place = placemarks[0];
+          String address =
+          '${place.subLocality}, ${place.thoroughfare},${place.locality} - ${place.postalCode}';
+        debugPrint("_currentAddress: $address");
+        return address;
+      }).catchError((e) {
+        debugPrint("_getAddressFromLatLng error ${e}");
+        throw Exception('Failed to get Adderess');
+      });
   }
 
   void _getUserCurrentLocation() async {
     showProgress();
+
+    
 
     final hasPermission = await _handleLocationPermission();
     if (!hasPermission) {
@@ -93,34 +103,39 @@ class _LocationPageState extends State<LocationPage> {
       return;
     }
 
-    _currentPosition = await _getCurrentPosition();
-    if (_currentPosition == null) {
+    try {
+      _currentPosition = await _getCurrentPosition();
+      if (_currentPosition == null) {
+        hideProgress();
+        return;
+      }
+
+      String? address = await _getAddressFromLatLng(
+          _currentPosition!.latitude, _currentPosition!.longitude);
+
+      if (address == null) {
+        hideProgress();
+        return;
+      }
+
+      setState(() {
+        _currentAddress = address;
+      });
+
+      _placeLocation = PlaceLocation(
+          latitude: _currentPosition!.latitude,
+          longitude: _currentPosition!.longitude,
+          address: _currentAddress!);
+
+      widget.onSelectedLocation(_placeLocation!);
+
+      hideProgress();
+
+    } catch (error) {
+      debugPrint("catch error ${error}");
       hideProgress();
       return;
     }
-
-    String? address = await _getAddressFromLatLng(
-      _currentPosition!.latitude, 
-      _currentPosition!.longitude);
-
-
-    if (address == null) {
-      hideProgress();
-      return;
-    }
-
-    setState(() {
-      _currentAddress = address;
-    });
-    
-    _placeLocation = PlaceLocation(
-        latitude: _currentPosition!.latitude,
-        longitude: _currentPosition!.longitude,
-        address: _currentAddress!);
-
-    widget.onSelectedLocation(_placeLocation!);
-
-    hideProgress();
   }
 
   @override
