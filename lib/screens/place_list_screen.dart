@@ -4,6 +4,7 @@ import 'package:flutter_favourite_places/providers/place_provider.dart';
 import 'package:flutter_favourite_places/screens/add_place_screen.dart';
 import 'package:flutter_favourite_places/screens/place_details_screen.dart';
 import 'package:flutter_favourite_places/widgets/location_page.dart';
+import 'package:flutter_favourite_places/widgets/place_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class PlaceListScreen extends ConsumerStatefulWidget {
@@ -16,6 +17,14 @@ class PlaceListScreen extends ConsumerStatefulWidget {
 }
 
 class _PlaceListScreenState extends ConsumerState<PlaceListScreen> {
+  late Future<void> _placeFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _placeFuture = ref.read(placeProvider.notifier).getAllPlaces();
+  }
+
   void _addPlace() {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (context) {
@@ -24,57 +33,9 @@ class _PlaceListScreenState extends ConsumerState<PlaceListScreen> {
     );
   }
 
-  void launchPlaceDetailsScreen(Place place) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (ctx) {
-        return PlaceDetailsScreen(
-          place: place,
-        );
-      }),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final placeList = ref.watch(placeProvider);
-
-    Widget content = Center(
-      child: Text(
-        "No Places added yet",
-        style: Theme.of(context).textTheme.titleLarge!.copyWith(
-              color: Theme.of(context).colorScheme.onBackground,
-            ),
-      ),
-    );
-
-    if (placeList.isNotEmpty) {
-      content = ListView.builder(
-        itemBuilder: (ctx, position) {
-          return ListTile(
-            contentPadding: const EdgeInsets.all(8),
-            leading: CircleAvatar(
-              radius: 26,
-              backgroundImage: FileImage(placeList[position].image),
-            ),
-            title: Text(
-              placeList[position].name,
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: Theme.of(context).colorScheme.onBackground,
-                  ),
-                ),
-            subtitle: Text(
-              placeList[position].placeLocation.address,
-              style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                  color: Theme.of(context).colorScheme.onBackground)
-                  ),
-            onTap: () {
-              return launchPlaceDetailsScreen(placeList[position]);
-            },
-          );
-        },
-        itemCount: placeList.length,
-      );
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -86,7 +47,14 @@ class _PlaceListScreenState extends ConsumerState<PlaceListScreen> {
           )
         ],
       ),
-      body: content,
+      body: FutureBuilder(
+        future: _placeFuture,
+        builder: (context, snapshot) {
+          return (snapshot.connectionState == ConnectionState.waiting)
+              ? const Center(child: CircularProgressIndicator())
+              : PlaceList(placeList: placeList);
+        },
+      ),
     );
   }
 }
