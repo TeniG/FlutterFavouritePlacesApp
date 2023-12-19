@@ -39,7 +39,9 @@ In summary, this Flutter project demonstrates the implementation of a favorite p
 This demo video is recorded in an emulator so by default the location is displayed as Google Office. In the actual device exact location is displayed.
 
 
-https://github.com/TeniG/FlutterFavouritePlacesApp/assets/43024245/d04d3e79-d5df-4ca5-9ae2-dc4d2d0bd017
+
+
+https://github.com/TeniG/FlutterFavouritePlacesApp/assets/43024245/ab4f35fb-4f2b-43e0-93eb-f700aafde635
 
 
 
